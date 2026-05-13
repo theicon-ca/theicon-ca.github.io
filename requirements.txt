@@ -1,1 +1,4 @@
-
+flask
+newspaper3k
+fpdf
+lxml_html_clean
