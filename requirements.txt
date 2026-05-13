@@ -3,3 +3,4 @@ newspaper3k
 fpdf
 lxml_html_clean
 gunicorn
+nltk
