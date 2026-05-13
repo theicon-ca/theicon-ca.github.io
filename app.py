@@ -1,55 +1,42 @@
-from flask import Flask, render_template, request, send_file
-from newspaper import Article
-from fpdf import FPDF
-import io
+import nltk
+from newspaper import Article, Config
 
-app = Flask(__name__)
+# This only needs to run once when the server starts
+nltk.download('punkt')
 
 def generate_pdf_buffer(url):
-    article = Article(url)
+    # 1. Setup a "User-Agent" to mimic a real browser
+    user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    config = Config()
+    config.browser_user_agent = user_agent
+    config.request_timeout = 10 # Don't wait forever
+
+    # 2. Initialize and Download
+    article = Article(url, config=config)
     article.download()
     article.parse()
+    
+    # NLP helps the library identify the actual 'body' of text
+    article.nlp()
 
+    # 3. Create PDF
     pdf = FPDF()
     pdf.add_page()
     
-    # Title - Using a standard font
+    # Formatting Title
     pdf.set_font("Arial", 'B', 16)
     title = article.title.encode('latin-1', 'ignore').decode('latin-1')
     pdf.multi_cell(0, 10, title)
     pdf.ln(10)
     
-    # Body Text
+    # Formatting Body
     pdf.set_font("Arial", size=12)
-    clean_text = article.text.encode('latin-1', 'ignore').decode('latin-1')
-    pdf.multi_cell(0, 10, clean_text)
+    # We use article.text which is the cleaned version
+    body_text = article.text.encode('latin-1', 'ignore').decode('latin-1')
+    pdf.multi_cell(0, 10, body_text)
     
-    # Generate PDF in memory
+    # Generate buffer
     pdf_output = pdf.output(dest='S').encode('latin-1')
     buffer = io.BytesIO(pdf_output)
     buffer.seek(0)
     return buffer
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/process', methods=['POST'])
-def process():
-    article_url = request.form.get('url')
-    if not article_url:
-        return "Please provide a URL", 400
-    
-    try:
-        pdf_file = generate_pdf_buffer(article_url)
-        return send_file(
-            pdf_file,
-            as_attachment=True,
-            download_name="article.pdf",
-            mimetype='application/pdf'
-        )
-    except Exception as e:
-        return f"Error processing article: {str(e)}", 500
-
-if __name__ == '__main__':
-    app.run(debug=True)
