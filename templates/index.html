@@ -1,1 +1,23 @@
-stay tuned
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clean Article PDF</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; background: #f4f4f9; }
+        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 400px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; background: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Article to PDF</h2>
+        <p>Enter a URL to get a clean, ad-free PDF.</p>
+        <form action="/process" method="POST">
+            <input type="url" name="url" placeholder="https://example.com/article" required>
+            <button type="submit">Convert for $1 (Free for Test)</button>
+        </form>
+    </div>
+</body>
+</html>
